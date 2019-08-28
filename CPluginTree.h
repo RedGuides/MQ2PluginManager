@@ -18,6 +18,7 @@ public:
 	bool UpOneLevel();
 	std::vector<char *> GetCurrentDirectoryListing();
 	void SetCurrentLevel(int level);
+
 private:
 	CPluginInfo *TreeRoot;
 	CPluginInfo *CurrentNode;

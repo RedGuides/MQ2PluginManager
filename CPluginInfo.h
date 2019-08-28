@@ -21,6 +21,7 @@ public:
 	CPluginInfo* GetInfoForId(int id);
 	char* GetDirectoryName();
 	int GetLevel();
+
 private:
 	CPluginInfo *Parent;
 	char FolderPath[MAX_STRING];

@@ -36,6 +36,7 @@ CPluginInfo::CPluginInfo(CPluginInfo *parent, char*name, bool isDirectory)
 	std::string dir = FolderPath;
 	sprintf_s(DirectoryName,"%s",dir.substr(dir.find_last_of("\\")+1).c_str());
 }
+
 CPluginInfo::~CPluginInfo()
 {
 	if(SubNodes.size()>0)
@@ -53,38 +54,47 @@ char* CPluginInfo::GetFolderPath()
 {
 	return FolderPath;
 }
+
 char* CPluginInfo::GetName()
 {
 	return Name;
 }
+
 int CPluginInfo::GetLevel()
 {
 	return DirectoryLevel;
 }
+
 std::vector<CPluginInfo *> CPluginInfo::GetListItems()
 {
 	return SubNodes;
 }
+
 char* CPluginInfo::GetDirectoryName()
 {
 	return DirectoryName;
 }
+
 bool CPluginInfo::IsDirectory()
 {
 	return directoryFlag;
 }
+
 bool CPluginInfo::IsRoot()
 {
 	return rootFlag;
 }
+
 char* CPluginInfo::GetDirectoryPath()
 {
 	return FolderPath;
 }
+
 CPluginInfo* CPluginInfo::GetParent()
 {
 	return Parent;
 }
+
 CPluginInfo* CPluginInfo::GetInfoForId(int id)
 {
 	if(id < 0)
@@ -97,6 +107,7 @@ CPluginInfo* CPluginInfo::GetInfoForId(int id)
 	}
 	return SubNodes[id];
 }
+
 void CPluginInfo::InitSubNodes()
 {
 	if(!directoryFlag)

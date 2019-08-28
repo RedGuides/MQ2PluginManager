@@ -19,6 +19,7 @@ public:
 	bool IsActive();
 	int WndNotification(CXWnd *pWnd, unsigned int Message, void *unknown);
 	void ToggleVisibility();
+
 private:
 	CPluginTree *PluginTree;
 	CListWnd *PluginListBox;
@@ -30,4 +31,4 @@ private:
 	void InitListView();
 };
 
-static PMQPLUGIN FindMQ2Plugin(PCHAR szLine);
+PMQPLUGIN FindMQ2Plugin(PCHAR szLine);

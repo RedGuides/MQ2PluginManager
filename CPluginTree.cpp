@@ -9,6 +9,7 @@ CPluginTree::CPluginTree()
 	TreeRoot = new CPluginInfo(NULL, gszINIPath, true);
 	CurrentNode = TreeRoot;
 }
+
 CPluginTree::~CPluginTree()
 {
 	if(TreeRoot)
@@ -17,18 +18,22 @@ CPluginTree::~CPluginTree()
 		TreeRoot = 0;
 	}
 }
+
 std::vector<CPluginInfo *> CPluginTree::GetCurrentPluginList()
 {
 	return CurrentNode->GetListItems();
 }
+
 CPluginInfo* CPluginTree::GetPluginInfo(int infoID)
 {
 	return CurrentNode->GetInfoForId(infoID);
 }
+
 void CPluginTree::SetCurrentParent(CPluginInfo* newParent)
 {
 	CurrentNode = newParent;
 }
+
 bool CPluginTree::UpOneLevel()
 {
 	if(CurrentNode->IsRoot())
@@ -38,6 +43,7 @@ bool CPluginTree::UpOneLevel()
 	CurrentNode = CurrentNode->GetParent();
 	return true;
 }
+
 void CPluginTree::SetCurrentLevel(int level)
 {
 	if(level >= CurrentNode->GetLevel())
@@ -49,6 +55,7 @@ void CPluginTree::SetCurrentLevel(int level)
 	}
 	SetCurrentParent(newCurrent);
 }
+
 std::vector<char *> CPluginTree::GetCurrentDirectoryListing()
 {
 	std::vector<char *> result;
