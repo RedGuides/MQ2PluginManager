@@ -5,8 +5,9 @@
 ***************************************************************/
 #pragma once
 #include "../MQ2Plugin.h"
-#include <vector>
 #include "CPluginInfo.h"
+#include <vector>
+
 
 class CPluginTree {
 public:

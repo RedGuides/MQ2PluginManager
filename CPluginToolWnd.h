@@ -5,9 +5,9 @@
 ***************************************************************/
 #pragma once
 #include "../MQ2Plugin.h"
-#include <vector>
 #include "CPluginInfo.h"
 #include "CPluginTree.h"
+#include <vector>
 
 class CPluginToolWnd : public CCustomWnd {
 public:
