@@ -116,7 +116,7 @@ bool CPluginToolWnd::checkXML()
 void CPluginToolWnd::SetPluginListItems()
 {
 	PluginListBox->DeleteAll();
-	vector<CPluginInfo *> v = PluginTree->GetCurrentPluginList();
+	std::vector<CPluginInfo *> v = PluginTree->GetCurrentPluginList();
 	unsigned int i;
 	unsigned int maxWidthCol1 = 0;
 	unsigned int maxWidthCol2 = 0;
@@ -156,4 +156,19 @@ void CPluginToolWnd::InitListView()
 		return;
 	}
 	SetPluginListItems();
+}
+
+static PMQPLUGIN FindMQ2Plugin(PCHAR szLine)
+{
+	PMQPLUGIN pPlugin = pPlugins;
+	while (pPlugin)
+	{
+		if (!_stricmp(szLine, pPlugin->szFilename))
+		{
+			return pPlugin;
+		}
+
+		pPlugin = pPlugin->pNext;
+	}
+	return nullptr;
 }

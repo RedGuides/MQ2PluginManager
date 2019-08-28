@@ -8,7 +8,7 @@
 #include <vector>
 #include "CPluginInfo.h"
 #include "CPluginTree.h"
-using namespace std;
+
 class CPluginToolWnd : public CCustomWnd {
 public:
 	CPluginToolWnd(CPluginTree *tree);
@@ -30,17 +30,4 @@ private:
 	void InitListView();
 };
 
-static PMQPLUGIN FindMQ2Plugin(PCHAR szLine)
-{
-	PMQPLUGIN pPlugin = pPlugins;
-	while (pPlugin)
-	{
-		if (!_stricmp(szLine, pPlugin->szFilename))
-		{
-			return pPlugin;
-		}
-
-		pPlugin = pPlugin->pNext;
-	}
-	return nullptr;
-}
+static PMQPLUGIN FindMQ2Plugin(PCHAR szLine);

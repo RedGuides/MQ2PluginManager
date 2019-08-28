@@ -61,7 +61,7 @@ int CPluginInfo::GetLevel()
 {
 	return DirectoryLevel;
 }
-vector<CPluginInfo *> CPluginInfo::GetListItems()
+std::vector<CPluginInfo *> CPluginInfo::GetListItems()
 {
 	return SubNodes;
 }
@@ -110,7 +110,7 @@ void CPluginInfo::InitSubNodes()
 	CHAR szSubFolder[MAX_STRING] = {0};
 	sprintf_s(szFilename,"%s\\*.*",GetFolderPath());
 	hSearch = FindFirstFile(szFilename, &FileData);
-	vector<CPluginInfo *> files;
+	std::vector<CPluginInfo *> files;
 	if (hSearch == INVALID_HANDLE_VALUE)
 	{
 		return;

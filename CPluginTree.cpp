@@ -17,7 +17,7 @@ CPluginTree::~CPluginTree()
 		TreeRoot = 0;
 	}
 }
-vector<CPluginInfo *> CPluginTree::GetCurrentPluginList()
+std::vector<CPluginInfo *> CPluginTree::GetCurrentPluginList()
 {
 	return CurrentNode->GetListItems();
 }
@@ -49,9 +49,9 @@ void CPluginTree::SetCurrentLevel(int level)
 	}
 	SetCurrentParent(newCurrent);
 }
-vector<char *> CPluginTree::GetCurrentDirectoryListing()
+std::vector<char *> CPluginTree::GetCurrentDirectoryListing()
 {
-	vector<char *> result;
+	std::vector<char *> result;
 	CPluginInfo *info;
 	info = CurrentNode;
 	while(!info->IsRoot())

@@ -6,7 +6,6 @@
 #pragma once
 #include "../MQ2Plugin.h"
 #include <vector>
-using namespace std;
 
 class CPluginInfo {
 public:
@@ -14,7 +13,7 @@ public:
 	~CPluginInfo();
 	char* GetFolderPath();
 	char* GetName();
-	vector<CPluginInfo *> GetListItems();
+	std::vector<CPluginInfo *> GetListItems();
 	bool IsDirectory();
 	bool IsRoot();
 	char* GetDirectoryPath();
@@ -33,6 +32,6 @@ private:
 	bool rootFlag;
 	bool fileError;
 	bool augmentedFile;
-	vector<CPluginInfo *> SubNodes;
+	std::vector<CPluginInfo *> SubNodes;
 	void InitSubNodes();
 };
