@@ -7,7 +7,6 @@
 
 CPluginToolWnd::CPluginToolWnd(CPluginTree *tree) : CCustomWnd("PluginManagerWindow")
 {
-	SetWndNotification(CPluginToolWnd);
 	validXML = checkXML();
 	if(!validXML)
 	{
@@ -42,7 +41,7 @@ void CPluginToolWnd::ShowWnd()
 		return;
 	}
 	isWndActive = true;
-	((CXWnd *)this)->Show(1,1);
+	this->Show(1,1);
 }
 void CPluginToolWnd::HideWnd()
 {
@@ -51,7 +50,7 @@ void CPluginToolWnd::HideWnd()
 		return;
 	}
 	isWndActive = false;
-	((CXWnd *)this)->Show(0,0);
+	this->Show(0,0);
 }
 bool CPluginToolWnd::IsActive()
 {
@@ -61,7 +60,7 @@ int CPluginToolWnd::WndNotification(CXWnd *pWnd, unsigned int Message, void *unk
 { 
 	CHAR szTemp[MAX_STRING]={0}, szBuffer[MAX_STRING]={0}, szMessageThing[MAX_STRING]={0};
 	int CurrentLine;
-	if (pWnd == (CXWnd*)PluginListBox)
+	if (pWnd == PluginListBox)
 	{
 		if (Message == XWM_LCLICK)
 		{
@@ -127,7 +126,7 @@ void CPluginToolWnd::SetPluginListItems()
 #else
 		PluginListBox->AddString(CXStr(""), 0,0,0);
 #endif
-		PluginListBox->SetItemText(i,0,&CXStr(v[i]->GetName()));
+		PluginListBox->SetItemText(i,0,v[i]->GetName());
 		if(v[i]->IsDirectory())
 		{
 			PluginListBox->SetItemColor(i,0,0xFFFFFFFF);

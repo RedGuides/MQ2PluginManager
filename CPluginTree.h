@@ -4,7 +4,7 @@
 * All Plugins inside the Plugin folder and its subfolders        *
 ***************************************************************/
 #pragma once
-#include "../MQ2Plugin.h"
+#include <MQ2Plugin.h>
 #include <vector>
 #include "CPluginInfo.h"
 using namespace std;

@@ -4,7 +4,7 @@
 * Window listing all available Plugins.                         *
 ***************************************************************/
 #pragma once
-#include "../MQ2Plugin.h"
+#include <MQ2Plugin.h>
 #include <vector>
 #include "CPluginInfo.h"
 #include "CPluginTree.h"
@@ -30,9 +30,9 @@ private:
 	void InitListView();
 };
 
-static PMQPLUGIN FindMQ2Plugin(PCHAR szLine)
+static MQPlugin* FindMQ2Plugin(PCHAR szLine)
 {
-	PMQPLUGIN pPlugin = pPlugins;
+	MQPlugin* pPlugin = pPlugins;
 	while (pPlugin)
 	{
 		if (!_stricmp(szLine, pPlugin->szFilename))
