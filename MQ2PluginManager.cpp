@@ -18,7 +18,7 @@
 
 
 
-#include <MQ2Plugin.h>
+#include <mq/Plugin.h>
 #include "CPluginTree.h"
 #include "CPluginToolWnd.h"
 #include "MQ2PluginManager.h"

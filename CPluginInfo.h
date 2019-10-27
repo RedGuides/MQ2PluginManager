@@ -4,7 +4,7 @@
 * Holds information about a single Plugin file                  *
 ***************************************************************/
 #pragma once
-#include <MQ2Plugin.h>
+#include <mq/Plugin.h>
 #include <vector>
 using namespace std;
 

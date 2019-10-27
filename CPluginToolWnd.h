@@ -4,7 +4,7 @@
 * Window listing all available Plugins.                         *
 ***************************************************************/
 #pragma once
-#include <MQ2Plugin.h>
+#include <mq/Plugin.h>
 #include <vector>
 #include "CPluginInfo.h"
 #include "CPluginTree.h"
