@@ -5,10 +5,10 @@
 ***************************************************************/
 #pragma once
 #include <mq/Plugin.h>
-#include <vector>
 #include "CPluginInfo.h"
 #include "CPluginTree.h"
-using namespace std;
+#include <vector>
+
 class CPluginToolWnd : public CCustomWnd {
 public:
 	CPluginToolWnd(CPluginTree *tree);
@@ -19,6 +19,7 @@ public:
 	bool IsActive();
 	int WndNotification(CXWnd *pWnd, unsigned int Message, void *unknown);
 	void ToggleVisibility();
+
 private:
 	CPluginTree *PluginTree;
 	CListWnd *PluginListBox;
@@ -30,17 +31,4 @@ private:
 	void InitListView();
 };
 
-static MQPlugin* FindMQ2Plugin(PCHAR szLine)
-{
-	MQPlugin* pPlugin = pPlugins;
-	while (pPlugin)
-	{
-		if (!_stricmp(szLine, pPlugin->szFilename))
-		{
-			return pPlugin;
-		}
-
-		pPlugin = pPlugin->pNext;
-	}
-	return nullptr;
-}
+MQPlugin* FindMQ2Plugin(PCHAR szLine);
