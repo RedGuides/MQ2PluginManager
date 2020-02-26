@@ -6,24 +6,22 @@
 // and Shutdown for setup and cleanup, do NOT do it in DllMain.
 
 /*
-	MQ2PluginManager by ChatWithThisName was written based on MQ2MacroTool.dll by Dencelle. 
+	MQ2PluginManager by ChatWithThisName was written based on MQ2MacroTool.dll by Dencelle.
 	Large chunks of the window code was used for the creation. ChatWithThisName mostly fumbled
 	around until things worked. There may be some residual code that is not even required by the
 	plugin in here, but if it is, I'm unaware of it. Chances are some of these things I just deleted
-	entirely and tried to run after a succesful compile only to crash and therefore was readded. 
+	entirely and tried to run after a succesful compile only to crash and therefore was readded.
 
-	History - 
+	History -
 		MQ2PluginManager created - 08/06/2019
 */
 
 
 
-#include "../MQ2Plugin.h"
+#include <mq/Plugin.h>
 #include "CPluginTree.h"
 #include "CPluginToolWnd.h"
 #include "MQ2PluginManager.h"
-using namespace std;
-
 
 PreSetup("MQ2PluginManager");
 

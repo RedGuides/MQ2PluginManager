@@ -4,7 +4,7 @@
 * All Plugins inside the Plugin folder and its subfolders        *
 ***************************************************************/
 #pragma once
-#include "../MQ2Plugin.h"
+#include <mq/Plugin.h>
 #include "CPluginInfo.h"
 #include <vector>
 
@@ -21,6 +21,6 @@ public:
 	void SetCurrentLevel(int level);
 
 private:
-	CPluginInfo *TreeRoot;
-	CPluginInfo *CurrentNode;
+	CPluginInfo* TreeRoot;
+	CPluginInfo* CurrentNode;
 };

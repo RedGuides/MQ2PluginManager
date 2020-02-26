@@ -6,7 +6,7 @@
 #include "CPluginTree.h"
 CPluginTree::CPluginTree()
 {
-	TreeRoot = new CPluginInfo(NULL, gszINIPath, true);
+	TreeRoot = new CPluginInfo(nullptr, gPathPlugins, true);
 	CurrentNode = TreeRoot;
 }
 

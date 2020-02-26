@@ -15,7 +15,7 @@ CPluginInfo::CPluginInfo(CPluginInfo *parent, char*name, bool isDirectory)
 		Parent = NULL;
 		DirectoryLevel = 0;
 		directoryFlag = true;
-		sprintf_s(FolderPath,"%s", gszINIPath);
+		sprintf_s(FolderPath,"%s", gPathPlugins);
 		InitSubNodes();
 	}
 	else
