@@ -24,6 +24,7 @@
 #include "MQ2PluginManager.h"
 
 PreSetup("MQ2PluginManager");
+PLUGIN_VERSION(2019.0828);
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 CPluginToolWnd* PluginWnd = 0;
