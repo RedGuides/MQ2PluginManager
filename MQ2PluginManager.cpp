@@ -71,7 +71,6 @@ void CreatePluginWindow()
 		return;
 	}
 }
-
 void DestroyPluginWindow()
 {
 	if (PluginWnd)
@@ -80,7 +79,6 @@ void DestroyPluginWindow()
 		PluginWnd = 0;
 	}
 }
-
 void DoPluginTool(PSPAWNINFO pChar, PCHAR szLine)
 {
 	char szTmp[MAX_STRING] = { 0 };
@@ -95,7 +93,6 @@ void DoPluginTool(PSPAWNINFO pChar, PCHAR szLine)
 	}
 	PluginWnd->SetVisible(1);
 }
-
 // Called after entering a new zone
 PLUGIN_API VOID OnZoned(VOID)
 {
@@ -108,7 +105,6 @@ PLUGIN_API VOID OnCleanUI(VOID)
 {
 	DebugSpewAlways("MQ2PluginManager::OnCleanUI()");
 	DestroyPluginWindow();
-
 }
 
 // Called once directly after the game ui is reloaded, after issuing /loadskin
@@ -127,7 +123,6 @@ PLUGIN_API VOID SetGameState(DWORD GameState)
 		CreatePluginWindow();
 	}
 }
-
 // This is called every time MQ pulses
 PLUGIN_API VOID OnPulse(VOID)
 {
