@@ -48,6 +48,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="README.MD" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>

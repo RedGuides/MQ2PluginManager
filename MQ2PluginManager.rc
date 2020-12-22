@@ -75,7 +75,6 @@ BEGIN
 #endif
             VALUE "FileVersion", "2019.0828"
             VALUE "InternalName", "MQ2PluginManager.dll"
-            VALUE "LegalCopyright", "Licensed under the GNU GPL v2"
             VALUE "OriginalFilename", "MQ2PluginManager.dll"
             VALUE "ProductName", "MQ2PluginManager"
             VALUE "ProductVersion", "2019.0828"
