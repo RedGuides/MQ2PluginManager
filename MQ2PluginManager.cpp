@@ -27,12 +27,12 @@ PreSetup("MQ2PluginManager");
 PLUGIN_VERSION(2019.0828);
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-CPluginToolWnd* PluginWnd = 0;
-CPluginTree* PluginTree = 0;
+CPluginToolWnd* PluginWnd = nullptr;
+CPluginTree* PluginTree = nullptr;
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 
 //=-=-=-=-=- Plugin members =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-PLUGIN_API VOID InitializePlugin(VOID)
+PLUGIN_API void InitializePlugin()
 {
 	DebugSpewAlways("Initializing MQ2PluginManager");
 	WriteChatColor("\aoLoading MQ2PluginManager v0.0.1 ...");
@@ -41,18 +41,18 @@ PLUGIN_API VOID InitializePlugin(VOID)
 	PluginTree = new CPluginTree();
 }
 
-PLUGIN_API VOID ShutdownPlugin(VOID)
+PLUGIN_API void ShutdownPlugin()
 {
 	DebugSpewAlways("Shutting down MQ2PluginManager");
 	if (PluginWnd)
 	{
 		delete PluginWnd;
-		PluginWnd = 0;
+		PluginWnd = nullptr;
 	}
 	if (PluginTree)
 	{
 		delete PluginTree;
-		PluginTree = 0;
+		PluginTree = nullptr;
 	}
 	RemoveCommand("/Pluginman");
 	RemoveXMLFile("MQUI_PluginManagerWnd.xml");
@@ -67,7 +67,6 @@ void CreatePluginWindow()
 	if (pSidlMgr->FindScreenPieceTemplate("PluginManagerWindow"))
 	{
 		PluginWnd = new CPluginToolWnd(PluginTree);
-		return;
 	}
 }
 void DestroyPluginWindow()
@@ -75,46 +74,39 @@ void DestroyPluginWindow()
 	if (PluginWnd)
 	{
 		delete PluginWnd;
-		PluginWnd = 0;
+		PluginWnd = nullptr;
 	}
 }
 void DoPluginTool(PSPAWNINFO pChar, PCHAR szLine)
 {
-	char szTmp[MAX_STRING] = { 0 };
 	if (!PluginWnd)
 	{
 		CreatePluginWindow();
 	}
+
 	if (!PluginWnd)
 	{
 		WriteChatColor("/PluginMan: Could not initialize Plugin tool window.", USERCOLOR_DEFAULT);
-		return;
 	}
-	PluginWnd->SetVisible(1);
-}
-// Called after entering a new zone
-PLUGIN_API VOID OnZoned(VOID)
-{
-	DebugSpewAlways("MQ2PluginManager::OnZoned()");
+	else
+	{
+		PluginWnd->SetVisible(true);
+	}
 }
 
-// Called once directly before shutdown of the new ui system, and also
-// every time the game calls CDisplay::CleanGameUI()
-PLUGIN_API VOID OnCleanUI(VOID)
+PLUGIN_API void OnCleanUI()
 {
 	DebugSpewAlways("MQ2PluginManager::OnCleanUI()");
 	DestroyPluginWindow();
 }
 
-// Called once directly after the game ui is reloaded, after issuing /loadskin
-PLUGIN_API VOID OnReloadUI(VOID)
+PLUGIN_API void OnReloadUI()
 {
 	DebugSpewAlways("MQ2PluginManager::OnReloadUI()");
 	CreatePluginWindow();
 }
 
-// Called once directly after initialization, and then every time the gamestate changes
-PLUGIN_API VOID SetGameState(DWORD GameState)
+PLUGIN_API void SetGameState(int GameState)
 {
 	DebugSpewAlways("MQ2PluginManager::SetGameState()");
 	if (GameState == GAMESTATE_INGAME && !PluginWnd)
@@ -122,10 +114,3 @@ PLUGIN_API VOID SetGameState(DWORD GameState)
 		CreatePluginWindow();
 	}
 }
-// This is called every time MQ pulses
-PLUGIN_API VOID OnPulse(VOID)
-{
-	// DONT leave in this debugspew, even if you leave in all the others
-	//DebugSpewAlways("MQ2PluginManager::OnPulse()");
-}
-
