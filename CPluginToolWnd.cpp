@@ -130,11 +130,7 @@ void CPluginToolWnd::SetPluginListItems()
 	unsigned int maxWidthCol2 = 0;
 	for(i = 0; i < v.size(); i++)
 	{
-#if defined(ROF2EMU) && defined(UFEMU)
-		PluginListBox->AddString(&CXStr(""),0,0,0);
-#else
-		PluginListBox->AddString(CXStr(""), 0,0,0);
-#endif
+		PluginListBox->AddString(CXStr(), 0,0,0);
 		PluginListBox->SetItemText(i,0,v[i]->GetName());
 		if(v[i]->IsDirectory())
 		{
