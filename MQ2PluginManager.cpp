@@ -151,13 +151,13 @@ void DrawPluginManager_MQSettingsPanel()
 				if (isLoaded)
 				{
 					mq::LoadPlugin(pluginName);
-					WriteChatf("\atPlugin \ax[\ay%s\ax\] \agLoaded!\ax", pluginName);
+					WriteChatf("\atPlugin \ax[\ay%s\ax] \agLoaded!\ax", pluginName);
 					LoadedPlugins.insert(pluginName);  // Update the set
 				}
 				else
 				{
 					mq::UnloadPlugin(pluginName);
-					WriteChatf("\atPlugin \ax[\ay%s\ax\] \arUnloaded!\ax", pluginName);
+					WriteChatf("\atPlugin \ax[\ay%s\ax] \arUnloaded!\ax", pluginName);
 					LoadedPlugins.erase(pluginName);  // Update the set
 				}
 			}
