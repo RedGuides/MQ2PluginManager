@@ -100,73 +100,59 @@ void DoPluginTool(PSPAWNINFO pChar, PCHAR szLine)
 	}
 }
 
-static MQPlugin* FindMQ2Plugin(const char* szLine)
+void DrawPluginManager_MQSettingsPanel()
 {
-	MQPlugin* pPlugin = pPlugins;
-	while (pPlugin)
+	// Toggle for MQ2PluginManager itself
+	if (ImGui::Selectable("", false))
 	{
-		if (!_stricmp(const_cast<char*>(szLine), pPlugin->szFilename))
-		{
-			return pPlugin;
-		}
-		pPlugin = pPlugin->pNext;
+		// Gracefully shutdown MQ2PluginManager
+		ShutdownPlugin();
+		WriteChatf("\atPlugin Manager\ax \arUnloading!\ax");
+		// Trying to close ourself with mq:UnloadPlugin causes a crash, so we issue the command for this one.
+		DoCommand(GetCharInfo()->pSpawn, "/plugin MQ2PluginManager unload");
+		return;
 	}
-	return nullptr;
-}
-
-
-void DrawPluginManager_MQSettingsPanel() {
-	ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "MQ2PluginManager");
-
-	std::vector<CPluginInfo*> pluginList = PluginTree->GetCurrentPluginList();
+	ImGui::SameLine();
+	ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "%s\tMQ2PluginManager", ICON_FA_TOGGLE_ON);
 
 	ImGui::SeparatorText("Plugins");
 
-	if (ImGui::BeginTable("PluginTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
-		int idx = 0;
-		for (auto& plugin : pluginList) {
+	std::vector<CPluginInfo*> pluginList = PluginTree->GetCurrentPluginList();
+
+	if (ImGui::BeginTable("PluginTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+	{
+		for (auto& plugin : pluginList)
+		{
 			const char* pluginName = plugin->GetName();
-			bool isLoaded = FindMQ2Plugin(pluginName) != nullptr;
+
+			// Skip drawing MQ2PluginManager in the table
+			if (strcmp(pluginName, "MQ2PluginManager") == 0)
+				continue;
+
+			bool isLoaded = mq::IsPluginLoaded(pluginName);
 			ImVec4 textColor = isLoaded ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(0.867f, 0.410f, 0.510f, 1.0f);
 
-			if (idx == 0) {
-				ImGui::TableNextRow();
-			}
-
-			ImGui::TableSetColumnIndex(idx);
+			ImGui::TableNextColumn();
 			ImGui::PushID(pluginName); // Ensure unique ID for each row
 
-			// Combine plugin name and toggle icon into one string
-			std::string combinedLabel = std::string(isLoaded ? ICON_FA_TOGGLE_ON : ICON_FA_TOGGLE_OFF) + "\t" + (pluginName) ;
-
 			// Create a selectable item with the combined string and color it
-			if (ImGui::Selectable("", false)) {
-				if (strcmp(pluginName, "MQ2PluginManager") == 0) {
-					// Gracefully shutdown MQ2PluginManager
-					ShutdownPlugin();
-					char unloadCmd[MAX_STRING];
-					sprintf_s(unloadCmd, "/plugin %s unload", pluginName);
-					DoCommand(GetCharInfo()->pSpawn, const_cast<char*>(unloadCmd));
+			if (ImGui::Selectable("", false))
+			{
+				if (isLoaded)
+				{
+					mq::UnloadPlugin(pluginName);
+					WriteChatf("\atPlugin \ax[\ay%s\ax\] \arUnloaded!\ax", pluginName);
 				}
-				else {
-					// Toggle other plugins state
-					if (isLoaded) {
-						char unloadCmd[MAX_STRING];
-						sprintf_s(unloadCmd, "/plugin %s unload", pluginName);
-						DoCommand(GetCharInfo()->pSpawn, const_cast<char*>(unloadCmd));
-					}
-					else {
-						char loadCmd[MAX_STRING];
-						sprintf_s(loadCmd, "/plugin %s", pluginName);
-						DoCommand(GetCharInfo()->pSpawn, const_cast<char*>(loadCmd));
-					}
+				else
+				{
+					mq::LoadPlugin(pluginName);
+					WriteChatf("\atPlugin \ax[\ay%s\ax\] \agLoaded!\ax", pluginName);
 				}
 			}
 			ImGui::SameLine();
-			ImGui::TextColored(textColor, "%s", combinedLabel.c_str());
-
+			// Display Toggle and Plugin Name, Colored highlight state.
+			ImGui::TextColored(textColor, "%s", fmt::format("{} {}", isLoaded ? ICON_FA_TOGGLE_ON : ICON_FA_TOGGLE_OFF, pluginName).c_str());
 			ImGui::PopID();
-			idx = (idx == 0) ? 1 : 0;
 		}
 		ImGui::EndTable();
 	}
