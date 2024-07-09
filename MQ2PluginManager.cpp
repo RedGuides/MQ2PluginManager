@@ -102,7 +102,6 @@ void DoPluginTool(PSPAWNINFO pChar, PCHAR szLine)
 
 void DrawPluginManager_MQSettingsPanel()
 {
-
 	ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "MQ2PluginManager");
 
 	ImGui::SeparatorText("Plugins");
@@ -119,29 +118,25 @@ void DrawPluginManager_MQSettingsPanel()
 			if (strcmp(pluginName, "MQ2PluginManager") == 0)
 				continue;
 
-			bool isLoaded = mq::IsPluginLoaded(pluginName);
-			ImVec4 textColor = isLoaded ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(0.867f, 0.410f, 0.510f, 1.0f);
-
 			ImGui::TableNextColumn();
 			ImGui::PushID(pluginName); // Ensure unique ID for each row
 
-			// Create a selectable item with the combined string and color it
-			if (ImGui::Selectable("", false))
+			// Create a checkbox for each plugin
+			bool isLoaded = mq::IsPluginLoaded(pluginName);
+			if (ImGui::Checkbox(pluginName, &isLoaded))
 			{
 				if (isLoaded)
-				{
-					mq::UnloadPlugin(pluginName);
-					WriteChatf("\atPlugin \ax[\ay%s\ax\] \arUnloaded!\ax", pluginName);
-				}
-				else
 				{
 					mq::LoadPlugin(pluginName);
 					WriteChatf("\atPlugin \ax[\ay%s\ax\] \agLoaded!\ax", pluginName);
 				}
+				else
+				{
+					mq::UnloadPlugin(pluginName);
+					WriteChatf("\atPlugin \ax[\ay%s\ax\] \arUnloaded!\ax", pluginName);
+				}
 			}
-			ImGui::SameLine();
-			// Display Toggle and Plugin Name, Colored highlight state.
-			ImGui::TextColored(textColor, "%s\t%s", isLoaded ? ICON_FA_TOGGLE_ON : ICON_FA_TOGGLE_OFF, pluginName);
+
 			ImGui::PopID();
 		}
 		ImGui::EndTable();
