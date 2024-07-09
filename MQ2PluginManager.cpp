@@ -31,6 +31,7 @@ PLUGIN_VERSION(2019.0828);
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 CPluginToolWnd* PluginWnd = nullptr;
 CPluginTree* PluginTree = nullptr;
+std::unordered_set<std::string> LoadedPlugins;
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 
 void DrawPluginManager_MQSettingsPanel();
@@ -44,6 +45,16 @@ PLUGIN_API void InitializePlugin()
 	AddXMLFile("MQUI_PluginManagerWnd.xml");
 	PluginTree = new CPluginTree();
 	AddSettingsPanel("plugins/PluginManager", DrawPluginManager_MQSettingsPanel);
+	// Initialize the LoadedPlugins set
+	std::vector<CPluginInfo*> pluginList = PluginTree->GetCurrentPluginList();
+	for (auto& plugin : pluginList)
+	{
+		const char* pluginName = plugin->GetName();
+		if (mq::IsPluginLoaded(pluginName))
+		{
+			LoadedPlugins.insert(pluginName);
+		}
+	}
 }
 
 PLUGIN_API void ShutdownPlugin()
@@ -62,6 +73,16 @@ PLUGIN_API void ShutdownPlugin()
 	RemoveCommand("/Pluginman");
 	RemoveXMLFile("MQUI_PluginManagerWnd.xml");
 	RemoveSettingsPanel("plugins/PluginManager");
+}
+
+PLUGIN_API void OnLoadPlugin(const char* PluginName)
+{
+	LoadedPlugins.insert(PluginName);
+}
+
+PLUGIN_API void OnUnloadPlugin(const char* PluginName)
+{
+	LoadedPlugins.erase(PluginName);
 }
 
 void CreatePluginWindow()
@@ -121,23 +142,28 @@ void DrawPluginManager_MQSettingsPanel()
 			ImGui::TableNextColumn();
 			ImGui::PushID(pluginName); // Ensure unique ID for each row
 
+			// Check if the plugin is loaded
+			bool isLoaded = LoadedPlugins.find(pluginName) != LoadedPlugins.end();
+
 			// Create a checkbox for each plugin
-			bool isLoaded = mq::IsPluginLoaded(pluginName);
 			if (ImGui::Checkbox(pluginName, &isLoaded))
 			{
 				if (isLoaded)
 				{
 					mq::LoadPlugin(pluginName);
 					WriteChatf("\atPlugin \ax[\ay%s\ax\] \agLoaded!\ax", pluginName);
+					LoadedPlugins.insert(pluginName);  // Update the set
 				}
 				else
 				{
 					mq::UnloadPlugin(pluginName);
 					WriteChatf("\atPlugin \ax[\ay%s\ax\] \arUnloaded!\ax", pluginName);
+					LoadedPlugins.erase(pluginName);  // Update the set
 				}
 			}
-
+			
 			ImGui::PopID();
+		
 		}
 		ImGui::EndTable();
 	}
