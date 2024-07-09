@@ -102,18 +102,8 @@ void DoPluginTool(PSPAWNINFO pChar, PCHAR szLine)
 
 void DrawPluginManager_MQSettingsPanel()
 {
-	// Toggle for MQ2PluginManager itself
-	if (ImGui::Selectable("", false))
-	{
-		// Gracefully shutdown MQ2PluginManager
-		ShutdownPlugin();
-		WriteChatf("\atPlugin Manager\ax \arUnloading!\ax");
-		// Trying to close ourself with mq:UnloadPlugin causes a crash, so we issue the command for this one.
-		DoCommand(GetCharInfo()->pSpawn, "/plugin MQ2PluginManager unload");
-		return;
-	}
-	ImGui::SameLine();
-	ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "%s\tMQ2PluginManager", ICON_FA_TOGGLE_ON);
+
+	ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "MQ2PluginManager");
 
 	ImGui::SeparatorText("Plugins");
 
@@ -151,7 +141,7 @@ void DrawPluginManager_MQSettingsPanel()
 			}
 			ImGui::SameLine();
 			// Display Toggle and Plugin Name, Colored highlight state.
-			ImGui::TextColored(textColor, "%s", fmt::format("{} {}", isLoaded ? ICON_FA_TOGGLE_ON : ICON_FA_TOGGLE_OFF, pluginName).c_str());
+			ImGui::TextColored(textColor, "%s\t%s", isLoaded ? ICON_FA_TOGGLE_ON : ICON_FA_TOGGLE_OFF, pluginName);
 			ImGui::PopID();
 		}
 		ImGui::EndTable();
