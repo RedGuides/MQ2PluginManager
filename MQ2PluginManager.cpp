@@ -108,7 +108,7 @@ void DrawPluginManager_MQSettingsPanel()
 
 	std::vector<CPluginInfo*> pluginList = PluginTree->GetCurrentPluginList();
 
-	if (ImGui::BeginTable("PluginTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+	if (ImGui::BeginTable("PluginTable", 2))
 	{
 		for (auto& plugin : pluginList)
 		{
