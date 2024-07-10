@@ -23,7 +23,6 @@
 #include "CPluginTree.h"
 #include "CPluginToolWnd.h"
 #include "MQ2PluginManager.h"
-#include "imgui/fonts/IconsFontAwesome.h"
 
 PreSetup("MQ2PluginManager");
 PLUGIN_VERSION(2019.0828);
@@ -32,6 +31,7 @@ PLUGIN_VERSION(2019.0828);
 CPluginToolWnd* PluginWnd = nullptr;
 CPluginTree* PluginTree = nullptr;
 std::unordered_set<std::string> LoadedPlugins;
+static bool showGameWin = false;
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 
 void DrawPluginManager_MQSettingsPanel();
@@ -45,6 +45,15 @@ PLUGIN_API void InitializePlugin()
 	AddXMLFile("MQUI_PluginManagerWnd.xml");
 	PluginTree = new CPluginTree();
 	AddSettingsPanel("plugins/PluginManager", DrawPluginManager_MQSettingsPanel);
+
+	// keep defaulted to true, for the users that never find the mqsettings window.
+	showGameWin = GetPrivateProfileBool("PluginManager", "ShowGameWin", true, INIFileName);
+
+	if (showGameWin)
+	{
+		CreatePluginWindow();
+	}
+
 	// Initialize the LoadedPlugins set
 	std::vector<CPluginInfo*> pluginList = PluginTree->GetCurrentPluginList();
 	for (auto& plugin : pluginList)
@@ -60,6 +69,7 @@ PLUGIN_API void InitializePlugin()
 PLUGIN_API void ShutdownPlugin()
 {
 	DebugSpewAlways("Shutting down MQ2PluginManager");
+	WritePrivateProfileBool("PluginManager", "ShowGameWin", showGameWin, INIFileName);
 	if (PluginWnd)
 	{
 		delete PluginWnd;
@@ -87,13 +97,14 @@ PLUGIN_API void OnUnloadPlugin(const char* PluginName)
 
 void CreatePluginWindow()
 {
-	if (PluginWnd)
+	if (!showGameWin || PluginWnd)
 	{
 		return;
 	}
 	if (pSidlMgr->FindScreenPieceTemplate("PluginManagerWindow"))
 	{
 		PluginWnd = new CPluginToolWnd(PluginTree);
+		showGameWin = true;
 	}
 }
 void DestroyPluginWindow()
@@ -102,6 +113,7 @@ void DestroyPluginWindow()
 	{
 		delete PluginWnd;
 		PluginWnd = nullptr;
+		showGameWin = false;
 	}
 }
 void DoPluginTool(PSPAWNINFO pChar, PCHAR szLine)
@@ -124,6 +136,19 @@ void DoPluginTool(PSPAWNINFO pChar, PCHAR szLine)
 void DrawPluginManager_MQSettingsPanel()
 {
 	ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "MQ2PluginManager");
+
+	if (ImGui::Checkbox("Toggle in game window", &showGameWin))
+	{
+		if (showGameWin)
+		{
+			CreatePluginWindow();
+		}
+		else
+		{
+			DestroyPluginWindow();
+		}
+		WritePrivateProfileBool("PluginManager", "ShowGameWin", showGameWin, INIFileName);
+	}
 
 	ImGui::SeparatorText("Plugins");
 
