@@ -1,157 +1,104 @@
 /***************************************************************
-* Plugin Info Class Implementation                              *
-*                                                              *
-*                                                              *
-***************************************************************/
+ * Plugin Info Class Implementation                            *
+ *                                                             *
+ *                                                             *
+ ***************************************************************/
 #include "CPluginInfo.h"
 
-CPluginInfo::CPluginInfo(CPluginInfo *parent, char*name, bool isDirectory)
+#include <fmt/format.h>
+#include <mq/Plugin.h>
+
+CPluginInfo::CPluginInfo(CPluginInfo* parent, std::string_view name, bool isDirectory)
+	: Parent(parent)
+	, Name(name)
+	, directoryFlag(isDirectory)
+	, rootFlag(parent == nullptr)
 {
-	strcpy_s(Name,name);
-	directoryFlag = isDirectory;
-	rootFlag = (parent == NULL);
-	if(rootFlag)
+	if (rootFlag)
 	{
-		Parent = NULL;
-		DirectoryLevel = 0;
-		directoryFlag = true;
-		sprintf_s(FolderPath,"%s", gPathPlugins);
+		FolderPath = gPathPlugins;
+
 		InitSubNodes();
 	}
 	else
 	{
-		Parent = parent;
-		if(directoryFlag)
+		if (directoryFlag)
 		{
-			DirectoryLevel = Parent->GetLevel()+1;
-			sprintf_s(FolderPath,"%s\\%s",Parent->GetFolderPath(),Name);
+			DirectoryLevel = Parent->GetLevel() + 1;
+			FolderPath = fmt::format("{}\\{}", Parent->GetFolderPath(), Name);
+
 			InitSubNodes();
 		}
 		else
 		{
 			DirectoryLevel = Parent->GetLevel();
-			sprintf_s(FolderPath,"%s",Parent->GetFolderPath());
+			FolderPath = Parent->GetFolderPath();
 		}
 	}
-	std::string dir = FolderPath;
-	sprintf_s(DirectoryName,"%s",dir.substr(dir.find_last_of("\\")+1).c_str());
+
+	std::string_view dir = FolderPath;
+	DirectoryName = dir.substr(dir.find_last_of("\\") + 1);
 }
 
 CPluginInfo::~CPluginInfo()
 {
-	if(SubNodes.size()>0)
+	for (size_t i = 0; i < SubNodes.size(); i++)
 	{
-		unsigned int i;
-		for(i = 0; i < SubNodes.size(); i++)
-		{
-			delete SubNodes[i];
-			SubNodes[i] = 0;
-		}
+		delete SubNodes[i];
 	}
-}
-
-char* CPluginInfo::GetFolderPath()
-{
-	return FolderPath;
-}
-
-char* CPluginInfo::GetName()
-{
-	return Name;
-}
-
-int CPluginInfo::GetLevel()
-{
-	return DirectoryLevel;
-}
-
-std::vector<CPluginInfo *> CPluginInfo::GetListItems()
-{
-	return SubNodes;
-}
-
-char* CPluginInfo::GetDirectoryName()
-{
-	return DirectoryName;
-}
-
-bool CPluginInfo::IsDirectory()
-{
-	return directoryFlag;
-}
-
-bool CPluginInfo::IsRoot()
-{
-	return rootFlag;
-}
-
-char* CPluginInfo::GetDirectoryPath()
-{
-	return FolderPath;
-}
-
-CPluginInfo* CPluginInfo::GetParent()
-{
-	return Parent;
+	SubNodes.clear();
 }
 
 CPluginInfo* CPluginInfo::GetInfoForId(int id)
 {
-	if(id < 0)
+	if (id >= 0 && id < SubNodes.size())
 	{
-		return NULL;
+		return SubNodes[id];
 	}
-	if(SubNodes.size()-1 < (unsigned int)id)
-	{
-		return NULL;
-	}
-	return SubNodes[id];
+
+	return nullptr;
 }
 
 void CPluginInfo::InitSubNodes()
 {
-	if(!directoryFlag)
+	if (!directoryFlag)
 	{
 		return;
 	}
-	HANDLE hSearch;
+
+	CHAR szFilename[MAX_PATH] = { 0 };
+	sprintf_s(szFilename, "%s\\*.*", GetFolderPath());
+
 	WIN32_FIND_DATA FileData;
-	BOOL fFinished = FALSE;
-	CHAR szFilename[MAX_STRING] = {0};
-	CHAR szSubFolder[MAX_STRING] = {0};
-	sprintf_s(szFilename,"%s\\*.*",GetFolderPath());
-	hSearch = FindFirstFile(szFilename, &FileData);
-	std::vector<CPluginInfo *> files;
+	HANDLE hSearch = FindFirstFile(szFilename, &FileData);
+	std::vector<CPluginInfo*> files;
 	if (hSearch == INVALID_HANDLE_VALUE)
 	{
 		return;
 	}
+
+	bool fFinished = false;
 	while (!fFinished)
 	{
-		if(!( (FileData.cFileName[0]=='.') && ( (FileData.cFileName[1]=='.' && FileData.cFileName[2]==0) || FileData.cFileName[1]==0 ) ))
+		if (!((FileData.cFileName[0] == '.')
+			&& ((FileData.cFileName[1] == '.'
+				&& FileData.cFileName[2] == 0) || FileData.cFileName[1] == 0)))
 		{
-			if(FileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			if (!(FileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 			{
-			}
-			else
-			{
-				std::string fName = FileData.cFileName;
-				if(fName.substr(fName.find_last_of(".")+1) == "dll")
+				if (ci_ends_with(FileData.cFileName, ".dll") && ci_starts_with(FileData.cFileName, "MQ"))
 				{
+					std::string_view fName = FileData.cFileName;
+					fName = fName.substr(0, fName.length() - 4);
 
-					if (fName.length())
-						if (strstr(fName.c_str(), "MQ2")) {
-							fName.erase(fName.length()-4);
-							char theName[MAX_STRING] = { 0 };
-							strcpy_s(theName, fName.c_str());
-							files.push_back(new CPluginInfo(this, theName, false));
-						}
+					files.push_back(new CPluginInfo(this, fName, false));
 				}
 			}
 		}
 		if (!FindNextFile(hSearch, &FileData))
-			fFinished = TRUE;
+			fFinished = true;
 	}
+
 	FindClose(hSearch);
-	SubNodes.insert(SubNodes.end(),files.begin(),files.end());
+	SubNodes = std::move(files);
 }

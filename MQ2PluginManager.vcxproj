@@ -82,7 +82,6 @@
     <ClInclude Include="CPluginInfo.h" />
     <ClInclude Include="CPluginToolWnd.h" />
     <ClInclude Include="CPluginTree.h" />
-    <ClInclude Include="MQ2PluginManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />

@@ -35,9 +35,6 @@
     <ClInclude Include="CPluginToolWnd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MQ2PluginManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CPluginInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>

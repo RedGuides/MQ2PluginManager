@@ -1,34 +1,33 @@
 /***************************************************************
-* Plugin Tool Window Class                                      *
-*                                                              *
-* Window listing all available Plugins.                         *
-***************************************************************/
+ * Plugin Tool Window Class                                    *
+ *                                                             *
+ * Window listing all available Plugins.                       *
+ ***************************************************************/
 #pragma once
-#include <mq/Plugin.h>
-#include "CPluginInfo.h"
-#include "CPluginTree.h"
-#include <vector>
 
-class CPluginToolWnd : public CCustomWnd {
+#include "CPluginTree.h"
+
+#include <mq/Plugin.h>
+
+class CPluginToolWnd : public CCustomWnd
+{
 public:
-	CPluginToolWnd(CPluginTree *tree);
-	~CPluginToolWnd();
+	CPluginToolWnd(CPluginTree* tree);
+	~CPluginToolWnd() override;
+
+	int WndNotification(CXWnd* pWnd, unsigned int Message, void* pData) override;
+
 	void RefreshPluginList();
 	void ShowWnd();
 	void HideWnd();
-	bool IsActive();
-	int WndNotification(CXWnd *pWnd, unsigned int Message, void *unknown);
 	void ToggleVisibility();
 
 private:
-	CPluginTree *PluginTree;
-	CListWnd *PluginListBox;
-	bool validXML;
-	bool initialized;
-	bool isWndActive;
-	bool checkXML();
+	CPluginTree* PluginTree = nullptr;
+	CListWnd* PluginListBox = nullptr;
+	bool initialized = false;
+	bool isWndActive = false;
+
 	void SetPluginListItems();
 	void InitListView();
 };
-
-MQPlugin* FindMQ2Plugin(PCHAR szLine);

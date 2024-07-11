@@ -1,18 +1,22 @@
 /***************************************************************
-* Plugin Tool Window Class                                      *
-*                                                              *
-* Window listing all available Plugins.                         *
-***************************************************************/
+ * Plugin Tool Window Class                                    *
+ *                                                             *
+ * Window listing all available Plugins.                       *
+ ***************************************************************/
+
 #include "CPluginToolWnd.h"
 
-CPluginToolWnd::CPluginToolWnd(CPluginTree *tree) : CCustomWnd("PluginManagerWindow")
+#include <mq/Plugin.h>
+
+CPluginToolWnd::CPluginToolWnd(CPluginTree* tree)
+	: CCustomWnd("PluginManagerWindow")
 {
-	validXML = checkXML();
-	if(!validXML)
-	{
-		return;
-	}
+	PluginListBox = (CListWnd*)GetChildItem("PM_PluginList");
 	PluginTree = tree;
+
+	if (PluginListBox == nullptr)
+		return;
+
 	InitListView();
 	isWndActive = true;
 }
@@ -23,7 +27,7 @@ CPluginToolWnd::~CPluginToolWnd()
 
 void CPluginToolWnd::ToggleVisibility()
 {
-	if(isWndActive)
+	if (isWndActive)
 	{
 		HideWnd();
 	}
@@ -40,140 +44,105 @@ void CPluginToolWnd::RefreshPluginList()
 
 void CPluginToolWnd::ShowWnd()
 {
-	if(isWndActive)
+	if (isWndActive)
 	{
 		return;
 	}
+
 	isWndActive = true;
-	this->Show(1,1);
+	this->Show(true);
 }
 
 void CPluginToolWnd::HideWnd()
 {
-	if(!isWndActive)
+	if (!isWndActive)
 	{
 		return;
 	}
+
 	isWndActive = false;
-	this->Show(0,0);
+	this->Show(false);
 }
 
-bool CPluginToolWnd::IsActive()
+int CPluginToolWnd::WndNotification(CXWnd* pWnd, unsigned int Message, void* pData)
 {
-	return isWndActive;
-}
-
-int CPluginToolWnd::WndNotification(CXWnd *pWnd, unsigned int Message, void *unknown)
-{
-	CHAR szTemp[MAX_STRING]={0}, szBuffer[MAX_STRING]={0}, szMessageThing[MAX_STRING]={0};
-	int CurrentLine;
 	if (pWnd == PluginListBox)
 	{
 		if (Message == XWM_LCLICK)
 		{
-			CurrentLine = PluginListBox->GetCurSel();
+			int CurrentLine = PluginListBox->GetCurSel();
 			if (CurrentLine >= 0)
 			{
-				char name[MAX_STRING] = { 0 };
 				CPluginInfo* selected = PluginTree->GetPluginInfo(CurrentLine);
-				sprintf_s(name, "%s", selected->GetName());
-				int endName = (int)(strstr(name, ".") - name);
-				if (endName >= 0 && endName < MAX_STRING)
-					name[endName] = 0;
-				if (int Loaded = FindMQ2Plugin(name) ? 0 : 1) {
-					char szOutput[MAX_STRING] = { 0 };
-					sprintf_s(szOutput, "/plugin %s", selected->GetName());
-					DoCommand(GetCharInfo()->pSpawn, szOutput);
+				const char* name = selected->GetName();
+
+				if (!IsPluginLoaded(selected->GetName()))
+				{
+					DoCommandf("/plugin %s load", selected->GetName());
+
 					PluginListBox->SetItemColor(CurrentLine, 0, 0xFF048500);
 				}
+
 				PluginListBox->ClearSel(CurrentLine);
 			}
-		} else if (Message == XWM_RCLICK) {
-			CurrentLine = PluginListBox->GetCurSel();
+
+			return 0;
+		}
+
+		if (Message == XWM_RCLICK)
+		{
+			int CurrentLine = PluginListBox->GetCurSel();
 			if (CurrentLine >= 0)
 			{
-				char name[MAX_STRING] = { 0 };
 				CPluginInfo* selected = PluginTree->GetPluginInfo(CurrentLine);
-				sprintf_s(name, "%s", selected->GetName());
-				int endName = (int)(strstr(name, ".") - name);
-				if (endName >= 0 && endName < MAX_STRING)
-					name[endName] = 0;
-				if (int Loaded = FindMQ2Plugin(name) ? 1 : 0) {
-					char szOutput[MAX_STRING] = { 0 };
-					sprintf_s(szOutput, "/plugin %s unload", selected->GetName());
-					DoCommand(GetCharInfo()->pSpawn, szOutput);
+
+				if (mq::IsPluginLoaded(selected->GetName()))
+				{
+					DoCommandf("/plugin %s unload", selected->GetName());
+
 					PluginListBox->SetItemColor(CurrentLine, 0, 0xFFCC3333);
 				}
 				PluginListBox->ClearSel(CurrentLine);
 			}
+
+			return 0;
 		}
 	}
-	return CSidlScreenWnd::WndNotification(pWnd,Message,unknown);
-}
 
-bool CPluginToolWnd::checkXML()
-{
-	bool checkflag = true;
-	if (!(PluginListBox=(CListWnd*)GetChildItem("PM_PluginList")))
-	{
-		checkflag = false;
-	}
-	return checkflag;
+	return CSidlScreenWnd::WndNotification(pWnd, Message, pData);
 }
 
 void CPluginToolWnd::SetPluginListItems()
 {
 	PluginListBox->DeleteAll();
-	std::vector<CPluginInfo *> v = PluginTree->GetCurrentPluginList();
-	unsigned int i;
-	unsigned int maxWidthCol1 = 0;
-	unsigned int maxWidthCol2 = 0;
-	for(i = 0; i < v.size(); i++)
+
+	const std::vector<CPluginInfo*>& v = PluginTree->GetCurrentPluginList();
+	int index = 0;
+	for (CPluginInfo* pluginInfo : v)
 	{
-		PluginListBox->AddString(CXStr(), 0,0,0);
-		PluginListBox->SetItemText(i,0,v[i]->GetName());
-		if(v[i]->IsDirectory())
+		PluginListBox->AddString(CXStr(), 0);
+		PluginListBox->SetItemText(index, 0, pluginInfo->GetName());
+
+		if (pluginInfo->IsDirectory())
 		{
-			PluginListBox->SetItemColor(i,0,0xFFFFFFFF);
+			PluginListBox->SetItemColor(index, 0, 0xFFFFFFFF);
 		}
 		else
 		{
-			int endName = 0;
-			char szOutput[MAX_STRING] = { 0 };
-			CPluginInfo* selected = PluginTree->GetPluginInfo(i);
-			sprintf_s(szOutput, "%s", selected->GetName());
-			endName = (int)(strstr(szOutput, ".")-szOutput);
-			if (endName >=0 && endName < MAX_STRING)
-				szOutput[endName] = 0;
-			if (FindMQ2Plugin(szOutput))
-				PluginListBox->SetItemColor(i,0,0xFF048500);
-			else
-				PluginListBox->SetItemColor(i, 0, 0xFFCC3333);
+			PluginListBox->SetItemColor(index, 0, mq::IsPluginLoaded(pluginInfo->GetName()) ? 0xFF048500 : 0xFFCC3333);
 		}
+
+		++index;
 	}
 }
 
 void CPluginToolWnd::InitListView()
 {
-	if(!PluginTree)
+	if (!PluginTree)
 	{
 		initialized = false;
 		return;
 	}
+
 	SetPluginListItems();
-}
-
-static MQPlugin* FindMQ2Plugin(PCHAR szLine)
-{
-	MQPlugin* pPlugin = pPlugins;
-	while (pPlugin)
-	{
-		if (!_stricmp(szLine, pPlugin->szFilename))
-		{
-			return pPlugin;
-		}
-
-		pPlugin = pPlugin->pNext;
-	}
-	return nullptr;
 }
