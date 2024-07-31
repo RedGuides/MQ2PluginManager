@@ -74,13 +74,11 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="CPluginInfo.cpp" />
-    <ClCompile Include="CPluginToolWnd.cpp" />
     <ClCompile Include="CPluginTree.cpp" />
     <ClCompile Include="MQ2PluginManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CPluginInfo.h" />
-    <ClInclude Include="CPluginToolWnd.h" />
     <ClInclude Include="CPluginTree.h" />
   </ItemGroup>
   <ItemGroup>
@@ -91,9 +89,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="resources\uifiles\default\MQUI_PluginManagerWnd.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

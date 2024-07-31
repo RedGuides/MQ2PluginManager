@@ -4,30 +4,37 @@
 	around until things worked. There may be some residual code that is not even required by the
 	plugin in here, but if it is, I'm unaware of it. Chances are some of these things I just deleted
 	entirely and tried to run after a succesful compile only to crash and therefore was readded.
+
+	July  9, 2024 Grimmier  -- Added ImGui Window to the mqsettings Panel.
+	July 30, 2024 Grimmier  -- Removed the in game XML window and replaced with a IMGUI window.
+							-- Added a toggle button to the mqsettings panel window.
+							-- Switched the /pluginman command to toggle the IMGUI window instead of the old XML.
 */
 
 #include <mq/Plugin.h>
 #include "CPluginTree.h"
-#include "CPluginToolWnd.h"
+#include "imgui/ImGuiUtils.h"
+#include <imgui_internal.h>
 
 PreSetup("MQ2PluginManager");
 PLUGIN_VERSION(2019.0828);
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-CPluginToolWnd* PluginWnd = nullptr;
 CPluginTree* PluginTree = nullptr;
 std::unordered_set<std::string> LoadedPlugins;
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 
 static void DrawPluginManager_MQSettingsPanel();
 static void PluginManagerCommand(PlayerClient*, const char*);
+static bool s_showWindow = false;
+static void ImGui_ToggleWindow();
 
 //=-=-=-=-=- Plugin members =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 PLUGIN_API void InitializePlugin()
 {
-	WriteChatColor("\aoLoading MQ2PluginManager v0.0.2 ...");
+	WriteChatColor("\aoLoading MQ2PluginManager v0.0.3 ...");
+	WriteChatColor("\at/pluginman \ayToggles the UI Window");
 	AddCommand("/Pluginman", PluginManagerCommand, false, false, true);
-	AddXMLFile("MQUI_PluginManagerWnd.xml");
 	PluginTree = new CPluginTree();
 	AddSettingsPanel("plugins/PluginManager", DrawPluginManager_MQSettingsPanel);
 
@@ -45,12 +52,6 @@ PLUGIN_API void InitializePlugin()
 
 PLUGIN_API void ShutdownPlugin()
 {
-	if (PluginWnd)
-	{
-		delete PluginWnd;
-		PluginWnd = nullptr;
-	}
-
 	if (PluginTree)
 	{
 		delete PluginTree;
@@ -58,7 +59,6 @@ PLUGIN_API void ShutdownPlugin()
 	}
 
 	RemoveCommand("/Pluginman");
-	RemoveXMLFile("MQUI_PluginManagerWnd.xml");
 	RemoveSettingsPanel("plugins/PluginManager");
 }
 
@@ -74,50 +74,13 @@ PLUGIN_API void OnUnloadPlugin(const char* PluginName)
 	LoadedPlugins.erase(PluginName);
 }
 
-void CreatePluginWindow()
-{
-	if (PluginWnd)
-	{
-		return;
-	}
-
-	if (pSidlMgr->FindScreenPieceTemplate("PluginManagerWindow"))
-	{
-		PluginWnd = new CPluginToolWnd(PluginTree);
-	}
-}
-
-void DestroyPluginWindow()
-{
-	if (PluginWnd)
-	{
-		delete PluginWnd;
-		PluginWnd = nullptr;
-	}
-}
-
 static void PluginManagerCommand(PlayerClient*, const char*)
 {
-	if (!PluginWnd)
-	{
-		CreatePluginWindow();
-	}
-
-	if (!PluginWnd)
-	{
-		WriteChatColor("/PluginMan: Could not initialize Plugin tool window.", USERCOLOR_DEFAULT);
-	}
-	else
-	{
-		PluginWnd->SetVisible(true);
-	}
+	ImGui_ToggleWindow();
 }
 
-void DrawPluginManager_MQSettingsPanel()
+static void DrawGUI()
 {
-	ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "MQ2PluginManager");
-	ImGui::SeparatorText("Plugins");
-
 	if (ImGui::BeginTable("PluginTable", 2))
 	{
 		const std::vector<CPluginInfo*>& pluginList = PluginTree->GetCurrentPluginList();
@@ -161,20 +124,40 @@ void DrawPluginManager_MQSettingsPanel()
 	}
 }
 
-PLUGIN_API void OnCleanUI()
+void DrawPluginManager_MQSettingsPanel()
 {
-	DestroyPluginWindow();
-}
-
-PLUGIN_API void OnReloadUI()
-{
-	CreatePluginWindow();
-}
-
-PLUGIN_API void SetGameState(int GameState)
-{
-	if (GameState == GAMESTATE_INGAME && !PluginWnd)
+	ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "MQ2PluginManager");
+	if (ImGui::Button("Toggle Plugin Manager Window"))
 	{
-		CreatePluginWindow();
+		ImGui_ToggleWindow();
 	}
+	ImGui::SameLine();
+	mq::imgui::HelpMarker("/pluginman\nWill also do the same thing from command line.");
+	ImGui::SeparatorText("Plugins");
+
+	DrawGUI();
+}
+
+PLUGIN_API void OnUpdateImGui()
+{
+	if (GetGameState() == GAMESTATE_INGAME)
+	{
+		if (!s_showWindow)
+			return;
+
+		ImGui::SetNextWindowSize(ImVec2(800, 440), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("PluginManager##Gui", &s_showWindow, ImGuiWindowFlags_None))
+		{
+			ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "MQ2PluginManager");
+			ImGui::SeparatorText("Plugins");
+			DrawGUI();
+		}
+		ImGui::End();
+	}
+}
+
+void ImGui_ToggleWindow()
+{
+	s_showWindow = !s_showWindow;
+	WriteChatColor("\aoToggeling Plugin Manager UI...");
 }
