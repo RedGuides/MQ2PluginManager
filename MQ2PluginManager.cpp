@@ -81,6 +81,11 @@ static void PluginManagerCommand(PlayerClient*, const char*)
 
 static void DrawGUI()
 {
+	ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "/pluginman");
+	ImGui::SameLine();
+	ImGui::Text("Toggles the GUI window.");
+	ImGui::SeparatorText("Plugins");
+
 	if (ImGui::BeginTable("PluginTable", 2))
 	{
 		const std::vector<CPluginInfo*>& pluginList = PluginTree->GetCurrentPluginList();
@@ -126,15 +131,6 @@ static void DrawGUI()
 
 void DrawPluginManager_MQSettingsPanel()
 {
-	ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "MQ2PluginManager");
-	if (ImGui::Button("Toggle Plugin Manager Window"))
-	{
-		ImGui_ToggleWindow();
-	}
-	ImGui::SameLine();
-	mq::imgui::HelpMarker("/pluginman\nWill also do the same thing from command line.");
-	ImGui::SeparatorText("Plugins");
-
 	DrawGUI();
 }
 
@@ -148,8 +144,6 @@ PLUGIN_API void OnUpdateImGui()
 		ImGui::SetNextWindowSize(ImVec2(800, 440), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("PluginManager##Gui", &s_showWindow, ImGuiWindowFlags_None))
 		{
-			ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "MQ2PluginManager");
-			ImGui::SeparatorText("Plugins");
 			DrawGUI();
 		}
 		ImGui::End();
