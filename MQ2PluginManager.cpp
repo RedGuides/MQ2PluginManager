@@ -4,17 +4,11 @@
 	around until things worked. There may be some residual code that is not even required by the
 	plugin in here, but if it is, I'm unaware of it. Chances are some of these things I just deleted
 	entirely and tried to run after a succesful compile only to crash and therefore was readded.
-
-	July  9, 2024 Grimmier  -- Added ImGui Window to the mqsettings Panel.
-	July 30, 2024 Grimmier  -- Removed the in game XML window and replaced with a IMGUI window.
-							-- Added a toggle button to the mqsettings panel window.
-							-- Switched the /pluginman command to toggle the IMGUI window instead of the old XML.
 */
 
 #include <mq/Plugin.h>
 #include "CPluginTree.h"
 #include "imgui/ImGuiUtils.h"
-#include <imgui_internal.h>
 
 PreSetup("MQ2PluginManager");
 PLUGIN_VERSION(2019.0828);
@@ -26,7 +20,7 @@ std::unordered_set<std::string> LoadedPlugins;
 
 static void DrawPluginManager_MQSettingsPanel();
 static void PluginManagerCommand(PlayerClient*, const char*);
-static bool s_showWindow = false;
+static bool s_showWindow = true;
 static void ImGui_ToggleWindow();
 
 //=-=-=-=-=- Plugin members =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
@@ -37,6 +31,7 @@ PLUGIN_API void InitializePlugin()
 	AddCommand("/Pluginman", PluginManagerCommand, false, false, true);
 	PluginTree = new CPluginTree();
 	AddSettingsPanel("plugins/PluginManager", DrawPluginManager_MQSettingsPanel);
+	s_showWindow = GetPrivateProfileBool("PluginManager", "ShowGui", true, INIFileName);
 
 	// Initialize the LoadedPlugins set
 	const std::vector<CPluginInfo*>& pluginList = PluginTree->GetCurrentPluginList();
@@ -136,22 +131,20 @@ void DrawPluginManager_MQSettingsPanel()
 
 PLUGIN_API void OnUpdateImGui()
 {
-	if (GetGameState() == GAMESTATE_INGAME)
-	{
-		if (!s_showWindow)
-			return;
+	if (!s_showWindow)
+		return;
 
-		ImGui::SetNextWindowSize(ImVec2(800, 440), ImGuiCond_FirstUseEver);
-		if (ImGui::Begin("PluginManager##Gui", &s_showWindow, ImGuiWindowFlags_None))
-		{
-			DrawGUI();
-		}
-		ImGui::End();
+	ImGui::SetNextWindowSize(ImVec2(800, 440), ImGuiCond_FirstUseEver);
+	if (ImGui::Begin("PluginManager##Gui", &s_showWindow, ImGuiWindowFlags_None))
+	{
+		DrawGUI();
 	}
+	ImGui::End();
 }
 
 void ImGui_ToggleWindow()
 {
 	s_showWindow = !s_showWindow;
+	WritePrivateProfileBool("PluginManager", "ShowGui", s_showWindow, INIFileName);
 	WriteChatColor("\aoToggeling Plugin Manager UI...");
 }
