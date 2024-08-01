@@ -8,7 +8,6 @@
 
 #include <mq/Plugin.h>
 #include "CPluginTree.h"
-#include "imgui/ImGuiUtils.h"
 
 PreSetup("MQ2PluginManager");
 PLUGIN_VERSION(2019.0828);
