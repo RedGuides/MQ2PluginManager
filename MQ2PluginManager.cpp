@@ -20,6 +20,7 @@ std::unordered_set<std::string> LoadedPlugins;
 static void DrawPluginManager_MQSettingsPanel();
 static void PluginManagerCommand(PlayerClient*, const char*);
 static bool s_showWindow = true;
+static bool s_showWinOutOfGame = false;
 static void ImGui_ToggleWindow();
 
 //=-=-=-=-=- Plugin members =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
@@ -27,7 +28,7 @@ PLUGIN_API void InitializePlugin()
 {
 	WriteChatColor("\aoLoading MQ2PluginManager...");
 	WriteChatColor("\at/pluginman \ayToggles the PluginManager UI Window");
-	AddCommand("/Pluginman", PluginManagerCommand, false, false, true);
+	AddCommand("/Pluginman", PluginManagerCommand, false, false, false);
 	PluginTree = new CPluginTree();
 	AddSettingsPanel("plugins/PluginManager", DrawPluginManager_MQSettingsPanel);
 	s_showWindow = GetPrivateProfileBool("PluginManager", "ShowGui", true, INIFileName);
@@ -130,7 +131,7 @@ void DrawPluginManager_MQSettingsPanel()
 
 PLUGIN_API void OnUpdateImGui()
 {
-	if (GetGameState() == GAMESTATE_INGAME)
+	if (GetGameState() == GAMESTATE_INGAME || s_showWinOutOfGame)
 	{
 		if (!s_showWindow)
 			return;
@@ -145,6 +146,7 @@ PLUGIN_API void OnUpdateImGui()
 		// save state when window is manually closed.
 		if (!s_showWindow)
 		{
+			s_showWinOutOfGame = false;
 			WritePrivateProfileBool("PluginManager", "ShowGui", s_showWindow, INIFileName);
 		}
 	}
@@ -153,6 +155,12 @@ PLUGIN_API void OnUpdateImGui()
 void ImGui_ToggleWindow()
 {
 	s_showWindow = !s_showWindow;
+	if (GetGameState() != GAMESTATE_INGAME)
+	{
+		// toggled window from out of game.
+		s_showWinOutOfGame = !s_showWinOutOfGame;
+		s_showWindow = s_showWinOutOfGame;
+	}
 	WritePrivateProfileBool("PluginManager", "ShowGui", s_showWindow, INIFileName);
 	WriteChatColor("\aoToggeling Plugin Manager UI...");
 }
