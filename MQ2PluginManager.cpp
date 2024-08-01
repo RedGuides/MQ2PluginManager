@@ -140,6 +140,12 @@ PLUGIN_API void OnUpdateImGui()
 		DrawGUI();
 	}
 	ImGui::End();
+
+	// save state when window is manually closed.
+	if (!s_showWindow)
+	{
+		WritePrivateProfileBool("PluginManager", "ShowGui", s_showWindow, INIFileName);
+	}
 }
 
 void ImGui_ToggleWindow()
