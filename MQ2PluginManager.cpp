@@ -26,8 +26,8 @@ static void ImGui_ToggleWindow();
 //=-=-=-=-=- Plugin members =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 PLUGIN_API void InitializePlugin()
 {
-	WriteChatColor("\aoLoading MQ2PluginManager v0.0.3 ...");
-	WriteChatColor("\at/pluginman \ayToggles the UI Window");
+	WriteChatColor("\aoLoading MQ2PluginManager...");
+	WriteChatColor("\at/pluginman \ayToggles the PluginManager UI Window");
 	AddCommand("/Pluginman", PluginManagerCommand, false, false, true);
 	PluginTree = new CPluginTree();
 	AddSettingsPanel("plugins/PluginManager", DrawPluginManager_MQSettingsPanel);
