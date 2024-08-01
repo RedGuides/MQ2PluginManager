@@ -131,20 +131,23 @@ void DrawPluginManager_MQSettingsPanel()
 
 PLUGIN_API void OnUpdateImGui()
 {
-	if (!s_showWindow)
-		return;
-
-	ImGui::SetNextWindowSize(ImVec2(800, 440), ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("PluginManager##Gui", &s_showWindow, ImGuiWindowFlags_None))
+	if (GetGameState() == GAMESTATE_INGAME)
 	{
-		DrawGUI();
-	}
-	ImGui::End();
+		if (!s_showWindow)
+			return;
 
-	// save state when window is manually closed.
-	if (!s_showWindow)
-	{
-		WritePrivateProfileBool("PluginManager", "ShowGui", s_showWindow, INIFileName);
+		ImGui::SetNextWindowSize(ImVec2(800, 440), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("PluginManager##Gui", &s_showWindow, ImGuiWindowFlags_None))
+		{
+			DrawGUI();
+		}
+		ImGui::End();
+
+		// save state when window is manually closed.
+		if (!s_showWindow)
+		{
+			WritePrivateProfileBool("PluginManager", "ShowGui", s_showWindow, INIFileName);
+		}
 	}
 }
 
