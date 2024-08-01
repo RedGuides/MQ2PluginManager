@@ -15,9 +15,6 @@
     <ClCompile Include="MQ2PluginManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CPluginToolWnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CPluginTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -32,9 +29,6 @@
     <ClInclude Include="CPluginTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CPluginToolWnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CPluginInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -46,10 +40,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="resources\uifiles\default\MQUI_PluginManagerWnd.xml">
-      <Filter>Resource Files</Filter>
-    </Xml>
   </ItemGroup>
 </Project>
