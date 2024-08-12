@@ -8,28 +8,30 @@
 
 #include <mq/Plugin.h>
 #include "CPluginTree.h"
-#include "CPluginToolWnd.h"
 
 PreSetup("MQ2PluginManager");
 PLUGIN_VERSION(2019.0828);
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-CPluginToolWnd* PluginWnd = nullptr;
 CPluginTree* PluginTree = nullptr;
 std::unordered_set<std::string> LoadedPlugins;
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 
 static void DrawPluginManager_MQSettingsPanel();
 static void PluginManagerCommand(PlayerClient*, const char*);
+static bool s_showWindow = true;
+static bool s_showWinOutOfGame = false;
+static void ImGui_ToggleWindow();
 
 //=-=-=-=-=- Plugin members =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 PLUGIN_API void InitializePlugin()
 {
-	WriteChatColor("\aoLoading MQ2PluginManager v0.0.2 ...");
-	AddCommand("/Pluginman", PluginManagerCommand, false, false, true);
-	AddXMLFile("MQUI_PluginManagerWnd.xml");
+	WriteChatColor("\aoLoading MQ2PluginManager...");
+	WriteChatColor("\at/pluginman \ayToggles the PluginManager UI Window");
+	AddCommand("/Pluginman", PluginManagerCommand, false, false, false);
 	PluginTree = new CPluginTree();
 	AddSettingsPanel("plugins/PluginManager", DrawPluginManager_MQSettingsPanel);
+	s_showWindow = GetPrivateProfileBool("PluginManager", "ShowGui", true, INIFileName);
 
 	// Initialize the LoadedPlugins set
 	const std::vector<CPluginInfo*>& pluginList = PluginTree->GetCurrentPluginList();
@@ -45,12 +47,6 @@ PLUGIN_API void InitializePlugin()
 
 PLUGIN_API void ShutdownPlugin()
 {
-	if (PluginWnd)
-	{
-		delete PluginWnd;
-		PluginWnd = nullptr;
-	}
-
 	if (PluginTree)
 	{
 		delete PluginTree;
@@ -58,7 +54,6 @@ PLUGIN_API void ShutdownPlugin()
 	}
 
 	RemoveCommand("/Pluginman");
-	RemoveXMLFile("MQUI_PluginManagerWnd.xml");
 	RemoveSettingsPanel("plugins/PluginManager");
 }
 
@@ -74,48 +69,16 @@ PLUGIN_API void OnUnloadPlugin(const char* PluginName)
 	LoadedPlugins.erase(PluginName);
 }
 
-void CreatePluginWindow()
-{
-	if (PluginWnd)
-	{
-		return;
-	}
-
-	if (pSidlMgr->FindScreenPieceTemplate("PluginManagerWindow"))
-	{
-		PluginWnd = new CPluginToolWnd(PluginTree);
-	}
-}
-
-void DestroyPluginWindow()
-{
-	if (PluginWnd)
-	{
-		delete PluginWnd;
-		PluginWnd = nullptr;
-	}
-}
-
 static void PluginManagerCommand(PlayerClient*, const char*)
 {
-	if (!PluginWnd)
-	{
-		CreatePluginWindow();
-	}
-
-	if (!PluginWnd)
-	{
-		WriteChatColor("/PluginMan: Could not initialize Plugin tool window.", USERCOLOR_DEFAULT);
-	}
-	else
-	{
-		PluginWnd->SetVisible(true);
-	}
+	ImGui_ToggleWindow();
 }
 
-void DrawPluginManager_MQSettingsPanel()
+static void DrawGUI()
 {
-	ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "MQ2PluginManager");
+	ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "/pluginman");
+	ImGui::SameLine();
+	ImGui::Text("Toggles the GUI window.");
 	ImGui::SeparatorText("Plugins");
 
 	if (ImGui::BeginTable("PluginTable", 2))
@@ -161,20 +124,43 @@ void DrawPluginManager_MQSettingsPanel()
 	}
 }
 
-PLUGIN_API void OnCleanUI()
+void DrawPluginManager_MQSettingsPanel()
 {
-	DestroyPluginWindow();
+	DrawGUI();
 }
 
-PLUGIN_API void OnReloadUI()
+PLUGIN_API void OnUpdateImGui()
 {
-	CreatePluginWindow();
-}
-
-PLUGIN_API void SetGameState(int GameState)
-{
-	if (GameState == GAMESTATE_INGAME && !PluginWnd)
+	if (GetGameState() == GAMESTATE_INGAME || s_showWinOutOfGame)
 	{
-		CreatePluginWindow();
+		if (!s_showWindow)
+			return;
+
+		ImGui::SetNextWindowSize(ImVec2(800, 440), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("PluginManager##Gui", &s_showWindow, ImGuiWindowFlags_None))
+		{
+			DrawGUI();
+		}
+		ImGui::End();
+
+		// save state when window is manually closed.
+		if (!s_showWindow)
+		{
+			s_showWinOutOfGame = false;
+			WritePrivateProfileBool("PluginManager", "ShowGui", s_showWindow, INIFileName);
+		}
 	}
+}
+
+void ImGui_ToggleWindow()
+{
+	s_showWindow = !s_showWindow;
+	if (GetGameState() != GAMESTATE_INGAME)
+	{
+		// toggled window from out of game.
+		s_showWinOutOfGame = !s_showWinOutOfGame;
+		s_showWindow = s_showWinOutOfGame;
+	}
+	WritePrivateProfileBool("PluginManager", "ShowGui", s_showWindow, INIFileName);
+	WriteChatColor("\aoToggeling Plugin Manager UI...");
 }
