@@ -79,9 +79,18 @@ static void DrawGUI()
 	ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "/pluginman");
 	ImGui::SameLine();
 	ImGui::Text("Toggles the GUI window.");
+
+	char searchPlugin[MAX_STRING] = { 0 };
+	ImGui::SetNextItemWidth(-125);
+	ImGui::InputTextWithHint("Search", "Search Plugins", searchPlugin, IM_ARRAYSIZE(searchPlugin));
 	ImGui::SeparatorText("Plugins");
 
-	if (ImGui::BeginTable("PluginTable", 2))
+	// dynamically draw table to width
+	float windowWidth = ImGui::GetContentRegionAvailWidth();
+	float renderWidth = 150.0f;
+	int numCols = std::max(1, static_cast<int>(std::floor(windowWidth / renderWidth)));
+
+	if (ImGui::BeginTable("PluginTable", numCols))
 	{
 		const std::vector<CPluginInfo*>& pluginList = PluginTree->GetCurrentPluginList();
 		for (const auto& plugin : pluginList)
@@ -90,6 +99,15 @@ static void DrawGUI()
 
 			// Skip drawing MQ2PluginManager in the table
 			if (strcmp(pluginName, "MQ2PluginManager") == 0)
+				continue;
+
+			// search filtering
+			std::string pNameLower = pluginName;
+			std::string searchLower = searchPlugin;
+			std::transform(pNameLower.begin(), pNameLower.end(), pNameLower.begin(), ::tolower);
+			std::transform(searchLower.begin(), searchLower.end(), searchLower.begin(), ::tolower);
+
+			if (searchLower[0] != '\0' && pNameLower.find(searchLower) == std::string::npos)
 				continue;
 
 			ImGui::TableNextColumn();
