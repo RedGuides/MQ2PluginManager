@@ -81,8 +81,7 @@ static void DrawGUI()
 	ImGui::Text("Toggles the GUI window.");
 
 	char searchPlugin[MAX_STRING] = { 0 };
-	ImGui::SetNextItemWidth(-125);
-	ImGui::InputTextWithHint("Search", "Search Plugins", searchPlugin, IM_ARRAYSIZE(searchPlugin));
+	ImGui::InputTextWithHint("", "Search Plugins", searchPlugin, IM_ARRAYSIZE(searchPlugin));
 	ImGui::SeparatorText("Plugins");
 
 	// dynamically draw table to width
@@ -102,12 +101,7 @@ static void DrawGUI()
 				continue;
 
 			// search filtering
-			std::string pNameLower = pluginName;
-			std::string searchLower = searchPlugin;
-			std::transform(pNameLower.begin(), pNameLower.end(), pNameLower.begin(), ::tolower);
-			std::transform(searchLower.begin(), searchLower.end(), searchLower.begin(), ::tolower);
-
-			if (searchLower[0] != '\0' && pNameLower.find(searchLower) == std::string::npos)
+			if (searchPlugin[0] != '\0' && ci_find_substr(pluginName, searchPlugin) == std::string::npos)
 				continue;
 
 			ImGui::TableNextColumn();
