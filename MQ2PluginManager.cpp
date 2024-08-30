@@ -22,6 +22,7 @@ static void PluginManagerCommand(PlayerClient*, const char*);
 static bool s_showWindow = true;
 static bool s_showWinOutOfGame = false;
 static void ImGui_ToggleWindow();
+char searchPlugin[24] = { 0 };
 
 //=-=-=-=-=- Plugin members =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 PLUGIN_API void InitializePlugin()
@@ -79,58 +80,69 @@ static void DrawGUI()
 	ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "/pluginman");
 	ImGui::SameLine();
 	ImGui::Text("Toggles the GUI window.");
-
-	char searchPlugin[MAX_STRING] = { 0 };
 	ImGui::InputTextWithHint("", "Search Plugins", searchPlugin, IM_ARRAYSIZE(searchPlugin));
 	ImGui::SeparatorText("Plugins");
 
+	const std::vector<CPluginInfo*>& pluginList = PluginTree->GetCurrentPluginList();
+	std::vector<const char*> filteredPlugins;
+	for (const auto& plugin : pluginList)
+	{
+		const char* pluginName = plugin->GetName();
+
+		// Skip drawing MQ2PluginManager in the table
+		if (strcmp(pluginName, "MQ2PluginManager") == 0)
+			continue;
+
+		// Search filtering
+		if (searchPlugin[0] != '\0' && ci_find_substr(pluginName, searchPlugin) == std::string::npos)
+			continue;
+
+		filteredPlugins.push_back(pluginName);
+	}
+
 	// dynamically draw table to width
-	float windowWidth = ImGui::GetContentRegionAvailWidth();
+	float windowWidth = ImGui::GetContentRegionAvail().x;
 	float renderWidth = 150.0f;
 	int numCols = std::max(1, static_cast<int>(std::floor(windowWidth / renderWidth)));
+	int numRows = (filteredPlugins.size() + numCols - 1) / numCols;
 
 	if (ImGui::BeginTable("PluginTable", numCols))
 	{
-		const std::vector<CPluginInfo*>& pluginList = PluginTree->GetCurrentPluginList();
-		for (const auto& plugin : pluginList)
+		for (int row = 0; row < numRows; ++row)
 		{
-			const char* pluginName = plugin->GetName();
-
-			// Skip drawing MQ2PluginManager in the table
-			if (strcmp(pluginName, "MQ2PluginManager") == 0)
-				continue;
-
-			// search filtering
-			if (searchPlugin[0] != '\0' && ci_find_substr(pluginName, searchPlugin) == std::string::npos)
-				continue;
-
-			ImGui::TableNextColumn();
-			ImGui::PushID(pluginName); // Ensure unique ID for each row
-
-			// Check if the plugin is loaded
-			bool isLoaded = LoadedPlugins.find(pluginName) != LoadedPlugins.end();
-
-			// Create a checkbox for each plugin
-			if (ImGui::Checkbox(pluginName, &isLoaded))
+			ImGui::TableNextRow();
+			for (int col = 0; col < numCols; ++col)
 			{
-				if (isLoaded)
-				{
-					mq::LoadPlugin(pluginName, true);
+				int index = row + col * numRows;
+				if (index >= filteredPlugins.size())
+					continue;
 
-					WriteChatf("\atPlugin \ax[\ay%s\ax] \agLoaded!\ax", pluginName);
-					LoadedPlugins.insert(pluginName);  // Update the set
-				}
-				else
-				{
-					mq::UnloadPlugin(pluginName, true);
+				const char* pluginName = filteredPlugins[index];
+				ImGui::TableNextColumn();
+				ImGui::PushID(pluginName); // Ensure unique ID for each row
 
-					WriteChatf("\atPlugin \ax[\ay%s\ax] \arUnloaded!\ax", pluginName);
-					LoadedPlugins.erase(pluginName);  // Update the set
+				// Check if the plugin is loaded
+				bool isLoaded = LoadedPlugins.find(pluginName) != LoadedPlugins.end();
+
+				// Create a checkbox for each plugin
+				if (ImGui::Checkbox(pluginName, &isLoaded))
+				{
+					if (isLoaded)
+					{
+						mq::LoadPlugin(pluginName, true);
+						WriteChatf("\atPlugin \ax[\ay%s\ax] \agLoaded!\ax", pluginName);
+						LoadedPlugins.insert(pluginName); // Update the set
+					}
+					else
+					{
+						mq::UnloadPlugin(pluginName, true);
+						WriteChatf("\atPlugin \ax[\ay%s\ax] \arUnloaded!\ax", pluginName);
+						LoadedPlugins.erase(pluginName); // Update the set
+					}
 				}
+
+				ImGui::PopID();
 			}
-			
-			ImGui::PopID();
-		
 		}
 		ImGui::EndTable();
 	}
