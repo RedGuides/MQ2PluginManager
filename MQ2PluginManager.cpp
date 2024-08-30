@@ -22,7 +22,7 @@ static void PluginManagerCommand(PlayerClient*, const char*);
 static bool s_showWindow = true;
 static bool s_showWinOutOfGame = false;
 static void ImGui_ToggleWindow();
-char searchPlugin[24] = { 0 };
+static char s_searchPlugin[24] = { 0 };
 
 //=-=-=-=-=- Plugin members =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 PLUGIN_API void InitializePlugin()
@@ -80,7 +80,7 @@ static void DrawGUI()
 	ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "/pluginman");
 	ImGui::SameLine();
 	ImGui::Text("Toggles the GUI window.");
-	ImGui::InputTextWithHint("", "Search Plugins", searchPlugin, IM_ARRAYSIZE(searchPlugin));
+	ImGui::InputTextWithHint("", "Search Plugins", s_searchPlugin, IM_ARRAYSIZE(s_searchPlugin));
 	ImGui::SeparatorText("Plugins");
 
 	const std::vector<CPluginInfo*>& pluginList = PluginTree->GetCurrentPluginList();
@@ -94,7 +94,7 @@ static void DrawGUI()
 			continue;
 
 		// Search filtering
-		if (searchPlugin[0] != '\0' && ci_find_substr(pluginName, searchPlugin) == std::string::npos)
+		if (s_searchPlugin[0] != '\0' && ci_find_substr(pluginName, s_searchPlugin) == -1)
 			continue;
 
 		filteredPlugins.push_back(pluginName);
