@@ -22,7 +22,7 @@ static void PluginManagerCommand(PlayerClient*, const char*);
 static bool s_showWindow = true;
 static bool s_showWinOutOfGame = false;
 static void ImGui_ToggleWindow();
-static char s_searchPlugin[24] = { 0 };
+static char s_searchPlugin[64] = { 0 };
 
 //=-=-=-=-=- Plugin members =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 PLUGIN_API void InitializePlugin()
@@ -80,7 +80,7 @@ static void DrawGUI()
 	ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "/pluginman");
 	ImGui::SameLine();
 	ImGui::Text("Toggles the GUI window.");
-	ImGui::InputTextWithHint("", "Search Plugins", s_searchPlugin, IM_ARRAYSIZE(s_searchPlugin));
+	ImGui::InputTextWithHint("##PluginFilter", "Search Plugins", s_searchPlugin, IM_ARRAYSIZE(s_searchPlugin));
 	ImGui::SeparatorText("Plugins");
 
 	const std::vector<CPluginInfo*>& pluginList = PluginTree->GetCurrentPluginList();
@@ -90,7 +90,7 @@ static void DrawGUI()
 		const char* pluginName = plugin->GetName();
 
 		// Skip drawing MQ2PluginManager in the table
-		if (strcmp(pluginName, "MQ2PluginManager") == 0)
+		if (ci_equals(pluginName, "MQ2PluginManager"))
 			continue;
 
 		// Search filtering
@@ -140,7 +140,6 @@ static void DrawGUI()
 						LoadedPlugins.erase(pluginName); // Update the set
 					}
 				}
-
 				ImGui::PopID();
 			}
 		}
