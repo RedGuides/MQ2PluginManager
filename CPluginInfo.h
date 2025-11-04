@@ -22,9 +22,7 @@ public:
 	const char* GetDirectoryPath() const { return FolderPath.c_str(); }
 	CPluginInfo* GetParent() const { return Parent; }
 	const char* GetDirectoryName() const { return DirectoryName.c_str(); }
-	int GetLevel() const { return DirectoryLevel; };
-
-	CPluginInfo* GetInfoForId(int id);
+	int GetLevel() const { return DirectoryLevel; }
 
 private:
 	void InitSubNodes();

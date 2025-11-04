@@ -16,7 +16,6 @@ public:
 	~CPluginTree();
 
 	const std::vector<CPluginInfo*>& GetCurrentPluginList() const { return TreeRoot->GetListItems(); }
-	CPluginInfo* GetPluginInfo(int infoID) const { return TreeRoot->GetInfoForId(infoID); }
 
 private:
 	CPluginInfo* TreeRoot;

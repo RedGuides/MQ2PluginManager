@@ -49,16 +49,6 @@ CPluginInfo::~CPluginInfo()
 	SubNodes.clear();
 }
 
-CPluginInfo* CPluginInfo::GetInfoForId(int id)
-{
-	if (id >= 0 && id < SubNodes.size())
-	{
-		return SubNodes[id];
-	}
-
-	return nullptr;
-}
-
 void CPluginInfo::InitSubNodes()
 {
 	if (!directoryFlag)
